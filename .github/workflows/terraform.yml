@@ -1,0 +1,40 @@
+name: Deploy DNS Records
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy-dns:
+    runs-on: self-hosted
+    environment:
+      name: DEV 
+    env:
+      WINDNS_SERVER: ${{ secrets.WINDNS_SERVER }}
+      WINDNS_USERNAME: ${{ secrets.WINDNS_USERNAME }}
+      WINDNS_PASSWORD: ${{ secrets.WINDNS_PASSWORD }}
+      WINDNS_DNS_SERVER_HOSTNAME: ${{ secrets.WINDNS_DNS_SERVER_HOSTNAME }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.8.5
+
+      - name: Terraform Init
+        working-directory: ./org/_account_template
+        run: terraform init
+
+      - name: Terraform Plan
+        working-directory: ./org/_account_template
+        run: terraform plan -var-file="../westside/dns.tfvars"
+
+      - name: Terraform Apply
+        if: github.ref == 'refs/heads/main'
+        working-directory: ./org/_account_template
+        run: terraform apply -auto-approve -var-file="../westside/dns.tfvars"
