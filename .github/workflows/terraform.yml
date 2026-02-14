@@ -16,6 +16,11 @@ jobs:
       WINDNS_USERNAME: ${{ secrets.WINDNS_USERNAME }}
       WINDNS_PASSWORD: ${{ secrets.WINDNS_PASSWORD }}
       WINDNS_DNS_SERVER_HOSTNAME: ${{ secrets.WINDNS_DNS_SERVER_HOSTNAME }}
+      TF_VAR_access_key: ${{ secrets.ACCESS_KEY }}
+      TF_VAR_secret_key: ${{ secrets.SECRET_KEY }}
+      AWS_ACCESS_KEY_ID: ${{ secrets.ACCESS_KEY }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.SECRET_KEY }}
+      VAULT_TOKEN: ${{ secrets.VAULT_TOKEN }}
 
     steps:
       - name: Checkout repository
