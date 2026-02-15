@@ -38,7 +38,13 @@ jobs:
 
       - name: Terraform Plan
         working-directory: ./org/_account_template
-        run: terraform plan -var-file="../westside/dns.tfvars"
+          run: |
+            export WINDNS_SERVER="${{ secrets.WINDNS_SERVER }}"
+            export WINDNS_USERNAME="${{ secrets.WINDNS_USERNAME }}"
+            export WINDNS_PASSWORD="${{ secrets.WINDNS_PASSWORD }}"
+            export WINDNS_DNS_SERVER_HOSTNAME="${{ secrets.WINDNS_DNS_SERVER_HOSTNAME }}"
+            terraform plan -var-file="../westside/dns.tfvars"
+
 
       - name: Terraform Apply
         if: github.ref == 'refs/heads/main'
