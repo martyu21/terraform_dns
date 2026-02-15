@@ -33,7 +33,7 @@ jobs:
 
       - name: Terraform Init
         working-directory: ./org/_account_template
-        run: terraform init
+        run: terraform init -reconfigure
 
       - name: Terraform Plan
         working-directory: ./org/_account_template
