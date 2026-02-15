@@ -1,7 +1,7 @@
 dns_records = [
   {
     dns_name    = "newtest1"
-    dns_records = ["0.0.0.0","0.0.0.1"]
+    dns_records = ["0.0.0.5","0.0.0.10"]
   }
 ]
 
