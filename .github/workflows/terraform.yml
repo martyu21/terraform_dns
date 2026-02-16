@@ -10,7 +10,18 @@ jobs:
   deploy-dns:
     runs-on: self-hosted
     environment:
-      name: DEV
+      name: DEV 
+    env:
+      WINDNS_SERVER: ${{ secrets.WINDNS_SERVER }}
+      WINDNS_USERNAME: ${{ secrets.WINDNS_USERNAME }}
+      WINDNS_PASSWORD: ${{ secrets.WINDNS_PASSWORD }}
+      WINDNS_DNS_SERVER_HOSTNAME: ${{ secrets.WINDNS_DNS_SERVER_HOSTNAME }}
+      TF_VAR_access_key: ${{ secrets.ACCESS_KEY }}
+      TF_VAR_secret_key: ${{ secrets.SECRET_KEY }}
+      AWS_ACCESS_KEY_ID: ${{ secrets.ACCESS_KEY }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.SECRET_KEY }}
+      VAULT_TOKEN: ${{ secrets.VAULT_TOKEN }}
+      VAULT_ADDR: ${{ secrets.VAULT_ADDR }}
 
     steps:
       - name: Checkout repository
@@ -21,22 +32,9 @@ jobs:
         with:
           terraform_version: 1.8.5
 
-      - name: Debug env (WINDNS*)
-        shell: bash
-        run: |
-          echo "WINDNS_SERVER from secrets: '${{ secrets.WINDNS_SERVER }}'"
-          echo "WINDNS_USERNAME from secrets: '${{ secrets.WINDNS_USERNAME }}'"
-          echo "WINDNS_PASSWORD is set: $([[ -n "${{ secrets.WINDNS_PASSWORD }}" ]] && echo yes || echo no)"
-
       - name: Terraform Init
-        shell: bash
         working-directory: ./org/_account_template
-        run: |
-          export WINDNS_SERVER="${{ secrets.WINDNS_SERVER }}"
-          export WINDNS_USERNAME="${{ secrets.WINDNS_USERNAME }}"
-          export WINDNS_PASSWORD="${{ secrets.WINDNS_PASSWORD }}"
-          export WINDNS_DNS_SERVER_HOSTNAME="${{ secrets.WINDNS_DNS_SERVER_HOSTNAME }}"
-          terraform init -reconfigure
+        run: terraform init -reconfigure
 
       - name: Terraform Plan
         shell: bash
@@ -50,11 +48,5 @@ jobs:
 
       - name: Terraform Apply
         if: github.ref == 'refs/heads/main'
-        shell: bash
         working-directory: ./org/_account_template
-        run: |
-          export WINDNS_SERVER="${{ secrets.WINDNS_SERVER }}"
-          export WINDNS_USERNAME="${{ secrets.WINDNS_USERNAME }}"
-          export WINDNS_PASSWORD="${{ secrets.WINDNS_PASSWORD }}"
-          export WINDNS_DNS_SERVER_HOSTNAME="${{ secrets.WINDNS_DNS_SERVER_HOSTNAME }}"
-          terraform apply -auto-approve -var-file="../westside/dns.tfvars"
+        run: terraform apply -auto-approve -var-file="../westside/dns.tfvars"
