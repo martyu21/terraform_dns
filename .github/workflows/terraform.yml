@@ -10,7 +10,8 @@ jobs:
   deploy-dns:
     runs-on: self-hosted
     environment:
-      name: DEV 
+      name: DEV
+
     env:
       WINDNS_SERVER: ${{ secrets.WINDNS_SERVER }}
       WINDNS_USERNAME: ${{ secrets.WINDNS_USERNAME }}
@@ -33,11 +34,13 @@ jobs:
           terraform_version: 1.8.5
 
       - name: Terraform Init
+        shell: bash {0}
         working-directory: ./org/_account_template
-        run: terraform init -reconfigure
+        run: |
+          terraform init -reconfigure
 
       - name: Terraform Plan
-        shell: bash
+        shell: bash {0}
         working-directory: ./org/_account_template
         run: |
           export WINDNS_SERVER="${{ secrets.WINDNS_SERVER }}"
@@ -48,5 +51,11 @@ jobs:
 
       - name: Terraform Apply
         if: github.ref == 'refs/heads/main'
+        shell: bash {0}
         working-directory: ./org/_account_template
-        run: terraform apply -auto-approve -var-file="../westside/dns.tfvars"
+        run: |
+          export WINDNS_SERVER="${{ secrets.WINDNS_SERVER }}"
+          export WINDNS_USERNAME="${{ secrets.WINDNS_USERNAME }}"
+          export WINDNS_PASSWORD="${{ secrets.WINDNS_PASSWORD }}"
+          export WINDNS_DNS_SERVER_HOSTNAME="${{ secrets.WINDNS_DNS_SERVER_HOSTNAME }}"
+          terraform apply -auto-approve -var-file="../westside/dns.tfvars"
