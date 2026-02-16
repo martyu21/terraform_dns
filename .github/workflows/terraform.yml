@@ -32,13 +32,15 @@ jobs:
           echo "whoami: $(whoami)"
           echo "Runner OS: $(uname -a)"
 
-      - name: Debug WINDNS variables (from secrets)
+      - name: Debug secrets exist
         shell: bash
         run: |
           echo "WINDNS_SSH_HOSTNAME set? $([[ -n '${{ secrets.WINDNS_SSH_HOSTNAME }}' ]] && echo yes || echo no)"
           echo "WINDNS_SSH_USERNAME set? $([[ -n '${{ secrets.WINDNS_SSH_USERNAME }}' ]] && echo yes || echo no)"
           echo "WINDNS_SSH_PASSWORD set? $([[ -n '${{ secrets.WINDNS_SSH_PASSWORD }}' ]] && echo yes || echo no)"
           echo "WINDNS_DNS_SERVER_HOSTNAME set? $([[ -n '${{ secrets.WINDNS_DNS_SERVER_HOSTNAME }}' ]] && echo yes || echo no)"
+          echo "AWS_ACCESS_KEY_ID set? $([[ -n '${{ secrets.ACCESS_KEY }}' ]] && echo yes || echo no)"
+          echo "AWS_SECRET_ACCESS_KEY set? $([[ -n '${{ secrets.SECRET_KEY }}' ]] && echo yes || echo no)"
 
       # -----------------------------
       # TERRAFORM INIT
@@ -47,14 +49,16 @@ jobs:
         shell: bash
         working-directory: ./org/_account_template
         run: |
-          echo "Exporting WINDNS vars for init..."
+          echo "Exporting WINDNS + AWS vars for init..."
           export WINDNS_SSH_HOSTNAME="${{ secrets.WINDNS_SSH_HOSTNAME }}"
           export WINDNS_SSH_USERNAME="${{ secrets.WINDNS_SSH_USERNAME }}"
           export WINDNS_SSH_PASSWORD="${{ secrets.WINDNS_SSH_PASSWORD }}"
           export WINDNS_DNS_SERVER_HOSTNAME="${{ secrets.WINDNS_DNS_SERVER_HOSTNAME }}"
+          export AWS_ACCESS_KEY_ID="${{ secrets.ACCESS_KEY }}"
+          export AWS_SECRET_ACCESS_KEY="${{ secrets.SECRET_KEY }}"
 
           echo "Environment inside init step:"
-          env | grep WINDNS || echo "No WINDNS vars found"
+          env | grep -E "WINDNS|AWS" || echo "No WINDNS/AWS vars found"
 
           echo "Running terraform init..."
           terraform init -reconfigure
@@ -66,14 +70,16 @@ jobs:
         shell: bash
         working-directory: ./org/_account_template
         run: |
-          echo "Exporting WINDNS vars for plan..."
+          echo "Exporting WINDNS + AWS vars for plan..."
           export WINDNS_SSH_HOSTNAME="${{ secrets.WINDNS_SSH_HOSTNAME }}"
           export WINDNS_SSH_USERNAME="${{ secrets.WINDNS_SSH_USERNAME }}"
           export WINDNS_SSH_PASSWORD="${{ secrets.WINDNS_SSH_PASSWORD }}"
           export WINDNS_DNS_SERVER_HOSTNAME="${{ secrets.WINDNS_DNS_SERVER_HOSTNAME }}"
+          export AWS_ACCESS_KEY_ID="${{ secrets.ACCESS_KEY }}"
+          export AWS_SECRET_ACCESS_KEY="${{ secrets.SECRET_KEY }}"
 
           echo "Environment inside plan step:"
-          env | grep WINDNS || echo "No WINDNS vars found"
+          env | grep -E "WINDNS|AWS" || echo "No WINDNS/AWS vars found"
 
           echo "Running terraform plan..."
           terraform plan -var-file="../westside/dns.tfvars"
@@ -86,14 +92,14 @@ jobs:
         shell: bash
         working-directory: ./org/_account_template
         run: |
-          echo "Exporting WINDNS vars for apply..."
           export WINDNS_SSH_HOSTNAME="${{ secrets.WINDNS_SSH_HOSTNAME }}"
           export WINDNS_SSH_USERNAME="${{ secrets.WINDNS_SSH_USERNAME }}"
           export WINDNS_SSH_PASSWORD="${{ secrets.WINDNS_SSH_PASSWORD }}"
           export WINDNS_DNS_SERVER_HOSTNAME="${{ secrets.WINDNS_DNS_SERVER_HOSTNAME }}"
+          export AWS_ACCESS_KEY_ID="${{ secrets.ACCESS_KEY }}"
+          export AWS_SECRET_ACCESS_KEY="${{ secrets.SECRET_KEY }}"
 
           echo "Environment inside apply step:"
-          env | grep WINDNS || echo "No WINDNS vars found"
+          env | grep -E "WINDNS|AWS" || echo "No WINDNS/AWS vars found"
 
-          echo "Running terraform apply..."
           terraform apply -auto-approve -var-file="../westside/dns.tfvars"
