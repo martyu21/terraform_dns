@@ -1,4 +1,4 @@
-name: Deploy DNS Records
+name: Deploy DNS Records (Diagnostic)
 
 on:
   workflow_dispatch:
@@ -10,19 +10,8 @@ jobs:
   deploy-dns:
     runs-on: self-hosted
     environment:
-      name: DEV 
-    env:
-      WINDNS_SSH_HOSTNAME: ${{ secrets.WINDNS_SSH_HOSTNAME }}
-      WINDNS_SSH_USERNAME: ${{ secrets.WINDNS_SSH_USERNAME }}
-      WINDNS_SSH_PASSWORD: ${{ secrets.WINDNS_SSH_PASSWORD }}
-      WINDNS_DNS_SERVER_HOSTNAME: ${{ secrets.WINDNS_DNS_SERVER_HOSTNAME }}
-      TF_VAR_access_key: ${{ secrets.ACCESS_KEY }}
-      TF_VAR_secret_key: ${{ secrets.SECRET_KEY }}
-      AWS_ACCESS_KEY_ID: ${{ secrets.ACCESS_KEY }}
-      AWS_SECRET_ACCESS_KEY: ${{ secrets.SECRET_KEY }}
-      VAULT_TOKEN: ${{ secrets.VAULT_TOKEN }}
-      VAULT_ADDR: ${{ secrets.VAULT_ADDR }}
-      
+      name: DEV
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -32,15 +21,79 @@ jobs:
         with:
           terraform_version: 1.8.5
 
+      # -----------------------------
+      # DIAGNOSTICS: SHELL + ENV VARS
+      # -----------------------------
+      - name: Show active shell
+        shell: bash
+        run: |
+          echo "SHELL: $SHELL"
+          echo "which bash: $(which bash || echo 'bash NOT FOUND')"
+          echo "whoami: $(whoami)"
+          echo "Runner OS: $(uname -a)"
+
+      - name: Debug WINDNS variables (from secrets)
+        shell: bash
+        run: |
+          echo "WINDNS_SSH_HOSTNAME set? $([[ -n '${{ secrets.WINDNS_SSH_HOSTNAME }}' ]] && echo yes || echo no)"
+          echo "WINDNS_SSH_USERNAME set? $([[ -n '${{ secrets.WINDNS_SSH_USERNAME }}' ]] && echo yes || echo no)"
+          echo "WINDNS_SSH_PASSWORD set? $([[ -n '${{ secrets.WINDNS_SSH_PASSWORD }}' ]] && echo yes || echo no)"
+          echo "WINDNS_DNS_SERVER_HOSTNAME set? $([[ -n '${{ secrets.WINDNS_DNS_SERVER_HOSTNAME }}' ]] && echo yes || echo no)"
+
+      # -----------------------------
+      # TERRAFORM INIT
+      # -----------------------------
       - name: Terraform Init
+        shell: bash
         working-directory: ./org/_account_template
-        run: terraform init -reconfigure
+        run: |
+          echo "Exporting WINDNS vars for init..."
+          export WINDNS_SSH_HOSTNAME="${{ secrets.WINDNS_SSH_HOSTNAME }}"
+          export WINDNS_SSH_USERNAME="${{ secrets.WINDNS_SSH_USERNAME }}"
+          export WINDNS_SSH_PASSWORD="${{ secrets.WINDNS_SSH_PASSWORD }}"
+          export WINDNS_DNS_SERVER_HOSTNAME="${{ secrets.WINDNS_DNS_SERVER_HOSTNAME }}"
 
+          echo "Environment inside init step:"
+          env | grep WINDNS || echo "No WINDNS vars found"
+
+          echo "Running terraform init..."
+          terraform init -reconfigure
+
+      # -----------------------------
+      # TERRAFORM PLAN
+      # -----------------------------
       - name: Terraform Plan
+        shell: bash
         working-directory: ./org/_account_template
-        run: terraform plan -var-file="../westside/dns.tfvars"
+        run: |
+          echo "Exporting WINDNS vars for plan..."
+          export WINDNS_SSH_HOSTNAME="${{ secrets.WINDNS_SSH_HOSTNAME }}"
+          export WINDNS_SSH_USERNAME="${{ secrets.WINDNS_SSH_USERNAME }}"
+          export WINDNS_SSH_PASSWORD="${{ secrets.WINDNS_SSH_PASSWORD }}"
+          export WINDNS_DNS_SERVER_HOSTNAME="${{ secrets.WINDNS_DNS_SERVER_HOSTNAME }}"
 
+          echo "Environment inside plan step:"
+          env | grep WINDNS || echo "No WINDNS vars found"
+
+          echo "Running terraform plan..."
+          terraform plan -var-file="../westside/dns.tfvars"
+
+      # -----------------------------
+      # TERRAFORM APPLY
+      # -----------------------------
       - name: Terraform Apply
         if: github.ref == 'refs/heads/main'
+        shell: bash
         working-directory: ./org/_account_template
-        run: terraform apply -auto-approve -var-file="../westside/dns.tfvars"
+        run: |
+          echo "Exporting WINDNS vars for apply..."
+          export WINDNS_SSH_HOSTNAME="${{ secrets.WINDNS_SSH_HOSTNAME }}"
+          export WINDNS_SSH_USERNAME="${{ secrets.WINDNS_SSH_USERNAME }}"
+          export WINDNS_SSH_PASSWORD="${{ secrets.WINDNS_SSH_PASSWORD }}"
+          export WINDNS_DNS_SERVER_HOSTNAME="${{ secrets.WINDNS_DNS_SERVER_HOSTNAME }}"
+
+          echo "Environment inside apply step:"
+          env | grep WINDNS || echo "No WINDNS vars found"
+
+          echo "Running terraform apply..."
+          terraform apply -auto-approve -var-file="../westside/dns.tfvars"
