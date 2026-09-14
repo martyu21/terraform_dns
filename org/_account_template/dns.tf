@@ -7,7 +7,7 @@ module "dns" {
     team_name       = var.team_name
     app_name        = var.app_name
     sub_app_name    = var.sub_app_name
-    environment     = var.environment
+#    environment     = var.environment
 
     providers = {
         windns = windns
