@@ -8,4 +8,4 @@ dns_records = [
 team_name     = "westside"
 app_name      = "towers"
 sub_app_name  = ""
-# environment   = "dev"
+environment   = "dev"
