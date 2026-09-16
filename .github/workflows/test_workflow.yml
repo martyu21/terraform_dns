@@ -3,8 +3,6 @@ name: Deploy DNS Records
 on:
   workflow_dispatch:
   push:
-    branches:
-      - [ "*" ]
 
 jobs:
   deploy-dns:
