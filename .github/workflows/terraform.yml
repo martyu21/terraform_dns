@@ -48,7 +48,7 @@ jobs:
       # UNIT TESTS: Terraform Test
       # -----------------------------
 
-      - name: Terraform Test
+      - name: Terraform Test - UNIT TESTING
         shell: bash
         working-directory: ./dns
         run: |
@@ -104,7 +104,7 @@ jobs:
       # -----------------------------
       # TERRAFORM APPLY - INTEGRATION TESTING
       # -----------------------------
-      - name: Terraform Apply
+      - name: Terraform Apply - INTEGRATION TESTING
         if: github.ref == 'refs/heads/main'
         shell: bash
         working-directory: ./org/_account_template
@@ -127,7 +127,7 @@ jobs:
       # -----------------------------
       # TERRAFORM DESTROY - INTEGRATION TESTING
       # -----------------------------
-      - name: Terraform Destroy
+      - name: Terraform Destroy - INTEGRATION TESTING
         if: github.ref == 'refs/heads/main'
         shell: bash
         working-directory: ./org/_account_template
