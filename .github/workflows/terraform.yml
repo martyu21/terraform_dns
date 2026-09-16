@@ -43,6 +43,18 @@ jobs:
           echo "AWS_SECRET_ACCESS_KEY set? $([[ -n '${{ secrets.SECRET_KEY }}' ]] && echo yes || echo no)"
           echo "VAULT_ADDR set? $([[ -n '${{ secrets.VAULT_ADDR }}' ]] && echo yes || echo no)"
           echo "VAULT_TOKEN set? $([[ -n '${{ secrets.VAULT_TOKEN }}' ]] && echo yes || echo no)"
+
+      # -----------------------------
+      # UNIT TESTS: Terraform Test
+      # -----------------------------
+
+      - name: Terraform Test
+        shell: bash
+        working-directory: ./dns
+        run: |
+          echo "Running Terraform tests..."
+          terraform test
+
       # -----------------------------
       # TERRAFORM INIT
       # -----------------------------
