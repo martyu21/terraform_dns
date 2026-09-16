@@ -1,10 +1,10 @@
-name: Deploy DNS Records (Diagnostic)
+name: Deploy DNS Records
 
 on:
   workflow_dispatch:
   push:
     branches:
-      - main
+      - ["*"]
 
 jobs:
   deploy-dns:
