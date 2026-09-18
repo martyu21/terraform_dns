@@ -32,3 +32,23 @@ run "expect_failure_dns_name" {
 
   expect_failures = [var.dns_name]
 }
+
+run "expect_failure_dns_name_double_hyphen" {
+  command = plan
+
+  variables {
+    dns_name = "invalid--name"
+  }
+
+  expect_failures = [var.dns_name]
+}
+
+run "expect_failure_dns_name_edge_hyphen" {
+  command = plan
+
+  variables {
+    dns_name = "-invalidname"
+  }
+
+  expect_failures = [var.dns_name]
+}

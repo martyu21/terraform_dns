@@ -5,6 +5,19 @@ variable "dns_name" {
     condition     = length(var.dns_name) <= 63
     error_message = "DNS names must be a maximum of 63 characters"
   }
+
+  validation {
+    condition = !can(regex("--", var.dns_name))
+    error_message = "dns_name must not contain consecutive hyphens."
+  }
+
+  validation {
+      condition = (
+        !startswith(var.dns_name, "-") &&
+        !endswith(var.dns_name, "-")
+      )
+      error_message = "dns_name must not start or end with a hyphen."
+    }
 }
 
 variable "dns_records" {
